@@ -1,35 +1,27 @@
 #include "./bfio.h"
 #include <stdlib.h>
-#include <stdbool.h>
 
-char *read_ASCII_string(FILE *in_fp, char *str_p, uint8_t num_chars) {
-    if (str_p == NULL) {
-        str_p = calloc(num_chars + 1, sizeof(char));
-    }
+char *read_str(FILE *in_fp, char *str, size_t num_ch) {
+    size_t ignore = fread(str, 1, num_ch, in_fp);
+    (void)ignore;
+    
+    str[num_ch] = '\0';
 
-    for (uint32_t i = 0; i < num_chars; i++) {
-        str_p[i] = (char)read_ASCII_char(in_fp);
-    }
-
-    str_p[num_chars] = '\0';
-
-    return str_p;
+    return str;
 }
 
-void write_ASCII_string(char *str_p, FILE *out_fp, uint8_t num_bytes) {
-    for (uint32_t i = 0; i < num_bytes; i++) {
-        write_byte(str_p[i], out_fp);
-    }
+size_t write_str(FILE *out_fp, char *str, size_t num_ch) {
+    return fwrite(str, 1, num_ch, out_fp);
 }
 
 uint32_t read_VLQ_max4_be(FILE *in_fp) {
     uint32_t value;
     byte_t c;
 
-    if ((value = read_byte(in_fp)) & 0x80) {
+    if ((value = fgetc(in_fp)) & 0x80) {
         value &= 0x0000007f; // strip high bit
         do {
-            value = (value << 7) + ((c = (byte_t)read_byte(in_fp)) & 0x7f);
+            value = (value << 7) + ((c = (byte_t)fgetc(in_fp)) & 0x7f);
         } while (c & 0x80);
     }
     return (value);
@@ -42,7 +34,7 @@ void write_VLQ_max4_be(uint32_t value, FILE *out_fp) {
         buffer |= 0x80;
         buffer += (value & 0x7f);
     }
-    while (true) {
+    while (1) {
         fputc(buffer, out_fp);
         if (buffer & 0x80)
             buffer >>= 8;
@@ -50,12 +42,6 @@ void write_VLQ_max4_be(uint32_t value, FILE *out_fp) {
             break;
     }
 }
-
-uint32_t read_VLQ_max4_le(FILE *in_fp) {
-    (void)in_fp;
-    return 0;
-}
-
 
 uint32_t read_uint(FILE *in_fp, uint8_t num_bytes, uint8_t endianness) {
     (void)in_fp;
@@ -103,22 +89,11 @@ uint32_t read_uint_4_be(FILE *in_fp) {
 }
 
 void write_uint_4_be(uint32_t num, FILE *out_fp) {
-    write_byte((num >> 24) & 0xFF, out_fp);
-    write_byte((num >> 16) & 0xFF, out_fp);
-    write_byte((num >> 8) & 0xFF, out_fp);
-    write_byte((num >> 0) & 0xFF, out_fp);
+    fputc((num >> 24) & 0xFF, out_fp);
+    fputc((num >> 16) & 0xFF, out_fp);
+    fputc((num >> 8) & 0xFF, out_fp);
+    fputc((num >> 0) & 0xFF, out_fp);
 }
-
-/* UNDEFINED BEHAVIOR
-uint32_t read_uint_4_le_OLD(FILE *in_fp) {
-    return
-        (uint32_t)0
-        | (read_byte(in_fp) << 0)
-        | (read_byte(in_fp) << 8)
-        | (read_byte(in_fp) << 16)
-        | (read_byte(in_fp) << 24);
-}
-*/
 
 uint32_t read_uint_4_le(FILE *in_fp) {
     unsigned char b[4];
@@ -135,8 +110,8 @@ uint32_t read_uint_4_le(FILE *in_fp) {
 }
 
 void write_uint_4_le(uint32_t num, FILE *out_fp) {
-    write_byte((num >> 0) & 0xFF, out_fp);
-    write_byte((num >> 8) & 0xFF, out_fp);
-    write_byte((num >> 16) & 0xFF, out_fp);
-    write_byte((num >> 24) & 0xFF, out_fp);
+    fputc((num >> 0) & 0xFF, out_fp);
+    fputc((num >> 8) & 0xFF, out_fp);
+    fputc((num >> 16) & 0xFF, out_fp);
+    fputc((num >> 24) & 0xFF, out_fp);
 }
