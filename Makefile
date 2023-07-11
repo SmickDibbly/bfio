@@ -48,7 +48,7 @@ $(TARGET) : $(OBJS)
 	$(HIDE)printf '$(BOLD)$(ORANGE)Building$(SGR0) $@\n'
 	$(HIDE)$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-.PHONY : clean install
+.PHONY : clean install cp2zigil
 
 clean :
 	$(RM) $(TARGET) $(OBJS) $(DEPS)
@@ -61,3 +61,7 @@ install :
 	$(HIDE)$(CP) $(TARGET) $(A_DEST)
 	$(HIDE)printf '$(BOLD)$(ORANGE)Copying header$(SGR0)\n'
 	$(HIDE)$(CP) $(LIBNAME).h $(H_DEST)
+
+cp2zigil :
+	$(HIDE)printf '$(BOLD)$(ORANGE)Copying source and header to Zigil directory.$(SGR0)\n'
+	$(HIDE)$(CP) $(LIBNAME).h $(LIBNAME).c $(ZIGIL_DEST)
