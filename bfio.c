@@ -1,8 +1,6 @@
 #include "./bfio.h"
 #include <stdlib.h>
 
-/* Pointless comment for branch testing. */
-
 char *read_str(FILE *in_fp, char *str, size_t num_ch) {
     size_t ignore = fread(str, 1, num_ch, in_fp);
     (void)ignore;
@@ -11,8 +9,6 @@ char *read_str(FILE *in_fp, char *str, size_t num_ch) {
 
     return str;
 }
-
-/* Another unimportant comment for branch testing. */
 
 size_t write_str(FILE *out_fp, char *str, size_t num_ch) {
     return fwrite(str, 1, num_ch, out_fp);
